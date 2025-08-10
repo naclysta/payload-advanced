@@ -1,0 +1,1 @@
+Intinya ini tu kode dasar yang ada di apk scam itu. Ini bukan lagi apk full, ini cuma sepotong kode yang akhirnya dimasukin ke dalam apk lain lalu dibungkus pakai kata "mod", atau yang lain. Scammer (aku ga sudi bilang mereka hacker) makin cerdas, harusnya kalian juga.
